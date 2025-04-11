@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>도효치의 감성 다이어리</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fef9f4;
+      font-family: 'Nanum Pen Script', cursive;
+      margin: 0;
+      padding: 30px;
+      color: #5d4037;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-left: 6px solid #f5c9b2;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      width: 70%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+
+    button {
+      background-color: #8d6e63;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .flex-group {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+    }
+
+    .weather {
+      border-right: 2px dashed #e0cfc2;
+      padding-right: 16px;
+      margin-right: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .flex-group {
+        grid-template-columns: 1fr;
+      }
+      .weather {
+        border-right: none;
+        margin-right: 0;
+        padding-right: 0;
+      }
+    }
+
+    .delete-btn {
+      background-color: #e57373;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .done {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+
+    /* 사이드바 */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100%;
+      background-color: white;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 999;
+    }
+
+    .sidebar.active {
+      right: 0;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📖 도효치의 감성 다이어리</h1>
+
+    <div class="card">
+      <p>📅 <strong>달력</strong> (여기에 달력 UI 들어갈 자리)</p>
+    </div>
+
+    <p style="text-align: center;">📍 선택한 날짜: <strong>2025-03-30 (일)</strong></p>
+
+    <div class="card flex-group">
+      <div class="weather">
+        <h2>☁️ 날씨 정보</h2>
+        <p>서울, 흐림</p>
+        <p>18℃</p>
+      </div>
+
+      <div class="todo">
+        <h2>📝 오늘의 할 일</h2>
+        <ul id="todo-list"></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>+ 새로운 할 일 추가하기</h2>
+      <input type="text" id="todo-input" placeholder="할 일을 입력하세요" />
+      <button id="add-btn">등록</button>
+    </div>
+  </div>
+
+  <!-- 사이드바 -->
+  <div id="sidebar" class="sidebar">
+    <h3>📝 할 일 수정</h3>
+    <input type="text" id="edit-input" />
+    <div style="margin-top: 10px;">
+      <button id="edit-confirm">수정</button>
+      <button id="edit-delete">삭제</button>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('todo-input');
+    const addBtn = document.getElementById('add-btn');
+    const todoList = document.getElementById('todo-list');
+
+    const sidebar = document.getElementById('sidebar');
+    const editInput = document.getElementById('edit-input');
+    const editBtn = document.getElementById('edit-confirm');
+    const deleteBtn = document.getElementById('edit-delete');
+
+    let currentLi = null;
+
+    addBtn.addEventListener('click', function () {
+      const value = input.value.trim();
+      if (value === '') {
+        alert('할 일을 입력해 주세요!');
+        return;
+      }
+
+      const li = document.createElement('li');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+
+      const span = document.createElement('span');
+      span.textContent = value;
+      span.style.marginLeft = '8px';
+
+      checkbox.addEventListener('change', function () {
+        span.classList.toggle('done', checkbox.checked);
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(span);
+      todoList.appendChild(li);
+      input.value = '';
+    });
+
+    // 리스트 클릭 시 사이드바 열기
+    todoList.addEventListener('click', function (e) {
+      const li = e.target.closest('li');
+      if (!li) return;
+      currentLi = li;
+      const span = li.querySelector('span');
+      editInput.value = span.textContent;
+      sidebar.classList.add('active');
+    });
+
+    editBtn.addEventListener('click', function () {
+      if (currentLi) {
+        const span = currentLi.querySelector('span');
+        span.textContent = editInput.value.trim();
+        sidebar.classList.remove('active');
+      }
+    });
+
+    deleteBtn.addEventListener('click', function () {
+      if (currentLi) {
+        currentLi.remove();
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
