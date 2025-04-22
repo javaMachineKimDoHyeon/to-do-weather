@@ -124,20 +124,20 @@
 </head>
 <body>
   <div class="container">
-    <h1>📖 도효치의 감성 다이어리</h1>
+    <h1> 도효치의 감성 다이어리</h1>
     <div class="card">
-      <label for="date-picker">📅 날짜 선택: </label>
+      <label for="date-picker"> 날짜 선택: </label>
       <input type="text" id="date-picker" placeholder="날짜를 선택해 주세요" />
     </div>
-    <p style="text-align: center;">📍 선택한 날짜: <strong id="selected-date-display">날짜를 선택해 주세요</strong></p>
+    <p style="text-align: center;"> 선택한 날짜: <strong id="selected-date-display">날짜를 선택해 주세요</strong></p>
     <div class="card flex-group">
       <div class="weather">
-        <h2>☁️ 날씨 정보</h2>
+        <h2> 날씨 정보</h2>
         <p>서울, 흐림</p>
         <p>18℃</p>
       </div>
       <div class="todo">
-        <h2>📝 오늘의 할 일</h2>
+        <h2> 오늘의 할 일</h2>
         <ul id="todo-list"></ul>
       </div>
     </div>
@@ -148,7 +148,7 @@
     </div>
   </div>
   <div id="sidebar" class="sidebar">
-    <h3>📝 할 일 수정</h3>
+    <h3> 할 일 수정</h3>
     <input type="text" id="edit-input" />
     <div style="margin-top: 10px;">
       <button id="edit-confirm">수정</button>
@@ -167,32 +167,39 @@
 
     let currentLi = null;
     let selectedDate = null;
+    let todoData = {};
 
-    // 날짜별 할 일을 저장할 객체
-    const todoData = {};
+    // 저장 함수
+    function saveToLocalStorage() {
+      localStorage.setItem('todo-data', JSON.stringify(todoData));
+    }
 
-    // 선택한 날짜에 맞는 할 일 목록 렌더링
+    // 불러오기 함수
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('todo-data');
+      if (saved) {
+        todoData = JSON.parse(saved);
+      }
+    }
+
+    // 할 일 렌더링
     function renderTodos() {
       todoList.innerHTML = '';
       if (!selectedDate || !todoData[selectedDate]) return;
-
       todoData[selectedDate].forEach((item, index) => {
         const li = document.createElement('li');
-
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = item.done;
-
         const span = document.createElement('span');
         span.textContent = item.text;
         span.style.marginLeft = '8px';
         if (item.done) span.classList.add('done');
-
         checkbox.addEventListener('change', function () {
           item.done = checkbox.checked;
           span.classList.toggle('done', checkbox.checked);
+          saveToLocalStorage();
         });
-
         li.appendChild(checkbox);
         li.appendChild(span);
         li.addEventListener('click', function () {
@@ -201,23 +208,21 @@
           sidebar.classList.add('active');
           currentLi.dataset.index = index;
         });
-
         todoList.appendChild(li);
       });
     }
 
-    // 할 일 추가
+    // 추가
     addBtn.addEventListener('click', function () {
       const value = input.value.trim();
       if (value === '' || !selectedDate) {
         alert('날짜를 선택하고, 할 일을 입력해 주세요!');
         return;
       }
-      if (!todoData[selectedDate]) {
-        todoData[selectedDate] = [];
-      }
+      if (!todoData[selectedDate]) todoData[selectedDate] = [];
       todoData[selectedDate].push({ text: value, done: false });
       input.value = '';
+      saveToLocalStorage();
       renderTodos();
     });
 
@@ -227,6 +232,7 @@
         const index = currentLi.dataset.index;
         todoData[selectedDate][index].text = editInput.value.trim();
         sidebar.classList.remove('active');
+        saveToLocalStorage();
         renderTodos();
       }
     });
@@ -237,6 +243,7 @@
         const index = currentLi.dataset.index;
         todoData[selectedDate].splice(index, 1);
         sidebar.classList.remove('active');
+        saveToLocalStorage();
         renderTodos();
       }
     });
@@ -251,6 +258,9 @@
         renderTodos();
       }
     });
+
+    // 시작 시 데이터 불러오기
+    loadFromLocalStorage();
   </script>
 </body>
 </html>
