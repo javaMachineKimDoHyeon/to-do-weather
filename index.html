@@ -124,20 +124,19 @@
 </head>
 <body>
   <div class="container">
-    <h1> 도효치의 감성 다이어리</h1>
+    <h1>📖 도효치의 감성 다이어리</h1>
     <div class="card">
-      <label for="date-picker"> 날짜 선택: </label>
+      <label for="date-picker">📅 날짜 선택: </label>
       <input type="text" id="date-picker" placeholder="날짜를 선택해 주세요" />
     </div>
-    <p style="text-align: center;"> 선택한 날짜: <strong id="selected-date-display">날짜를 선택해 주세요</strong></p>
+    <p style="text-align: center;">📍 선택한 날짜: <strong id="selected-date-display">날짜를 선택해 주세요</strong></p>
     <div class="card flex-group">
-      <div class="weather">
-        <h2> 날씨 정보</h2>
-        <p>서울, 흐림</p>
-        <p>18℃</p>
+      <div class="weather" id="weather-box">
+        <h2>☁️ 날씨 정보</h2>
+        <p>로딩 중...</p>
       </div>
       <div class="todo">
-        <h2> 오늘의 할 일</h2>
+        <h2>📝 오늘의 할 일</h2>
         <ul id="todo-list"></ul>
       </div>
     </div>
@@ -148,7 +147,7 @@
     </div>
   </div>
   <div id="sidebar" class="sidebar">
-    <h3> 할 일 수정</h3>
+    <h3>📝 할 일 수정</h3>
     <input type="text" id="edit-input" />
     <div style="margin-top: 10px;">
       <button id="edit-confirm">수정</button>
@@ -156,6 +155,22 @@
     </div>
   </div>
   <script>
+    const API_KEY = '75486a58af102f1fb237ea3b5ad2ffa4';
+    const CITY = 'Busan';
+
+    async function fetchWeather() {
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=metric&lang=kr&appid=${API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const weatherBox = document.getElementById('weather-box');
+
+      weatherBox.innerHTML = `
+        <h2>☁️ 날씨 정보</h2>
+        <p>${data.name}, ${data.weather[0].description}</p>
+        <p>${Math.round(data.main.temp)}℃</p>
+      `;
+    }
+
     const input = document.getElementById('todo-input');
     const addBtn = document.getElementById('add-btn');
     const todoList = document.getElementById('todo-list');
@@ -169,12 +184,10 @@
     let selectedDate = null;
     let todoData = {};
 
-    // 저장 함수
     function saveToLocalStorage() {
       localStorage.setItem('todo-data', JSON.stringify(todoData));
     }
 
-    // 불러오기 함수
     function loadFromLocalStorage() {
       const saved = localStorage.getItem('todo-data');
       if (saved) {
@@ -182,7 +195,6 @@
       }
     }
 
-    // 할 일 렌더링
     function renderTodos() {
       todoList.innerHTML = '';
       if (!selectedDate || !todoData[selectedDate]) return;
@@ -212,7 +224,6 @@
       });
     }
 
-    // 추가
     addBtn.addEventListener('click', function () {
       const value = input.value.trim();
       if (value === '' || !selectedDate) {
@@ -226,7 +237,6 @@
       renderTodos();
     });
 
-    // 수정
     editBtn.addEventListener('click', function () {
       if (currentLi && selectedDate) {
         const index = currentLi.dataset.index;
@@ -237,7 +247,6 @@
       }
     });
 
-    // 삭제
     deleteBtn.addEventListener('click', function () {
       if (currentLi && selectedDate) {
         const index = currentLi.dataset.index;
@@ -248,7 +257,6 @@
       }
     });
 
-    // flatpickr 초기화
     flatpickr("#date-picker", {
       dateFormat: "Y-m-d",
       defaultDate: new Date(),
@@ -256,11 +264,25 @@
         selectedDate = dateStr;
         dateDisplay.textContent = selectedDate;
         renderTodos();
+
+        const today = new Date().toISOString().split('T')[0];
+        const weatherBox = document.getElementById('weather-box');
+
+        if (dateStr === today) {
+          fetchWeather();
+        } else {
+          weatherBox.innerHTML = `
+            <h2>☁️ 날씨 정보</h2>
+            <p>${CITY}의 날씨는</p>
+            <p><strong>예보 준비 중이에요 ☁️</strong></p>
+          `;
+        }
       }
     });
 
-    // 시작 시 데이터 불러오기
+    // 초기 실행
     loadFromLocalStorage();
+    fetchWeather();
   </script>
 </body>
 </html>
