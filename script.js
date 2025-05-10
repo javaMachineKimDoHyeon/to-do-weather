@@ -1,4 +1,4 @@
-
+// script.js
 const API_KEY = '75486a58af102f1fb237ea3b5ad2ffa4';
 const CITY = 'Busan';
 
