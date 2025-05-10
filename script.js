@@ -1,4 +1,5 @@
 // script.js
+// 날씨와 할일을 분리해서 모듈화 하였음
 const API_KEY = '75486a58af102f1fb237ea3b5ad2ffa4';
 const CITY = 'Busan';
 
