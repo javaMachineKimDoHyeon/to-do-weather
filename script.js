@@ -1,4 +1,5 @@
 // script.js
+// 모듈화
 import {
     loadFromLocalStorage,
     saveToLocalStorage,
