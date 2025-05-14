@@ -1,5 +1,6 @@
 // script.js
 // 모듈화
+// todos랑 weather 분리하기
 import {
     loadFromLocalStorage,
     saveToLocalStorage,
